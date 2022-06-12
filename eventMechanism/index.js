@@ -3,7 +3,7 @@ const methodMap = {};
 function eventHandler(mapName,eventName, cb) {
 
     if(!cb) {
-        throw Error("Invalid call back");
+        throw Error("Invalid callback");
     }
 
     if(! (typeof eventName == "string") || eventName instanceof String) {
@@ -21,23 +21,22 @@ function eventHandler(mapName,eventName, cb) {
     methodMap[mapName].set(eventName, cb);
 }
 
-function eventEmiter(mapName ,eventName, cb) {
-    if(!(methodMap[mapName].has(eventName))) {
-        return
+function isHandlerExists(mapName, eventName) {
+    return methodMap[mapName] instanceof Map && methodMap[mapName].has(eventName);  
+}
+
+function eventEmiter(mapName ,eventName, request, response) {
+    if(!isHandlerExists(mapName, eventName)) {
+        return;
     }
 
     if(! (typeof eventName == "string") || eventName instanceof String) {
         throw Error("Event name heve to be a String");
     }
 
-    const eventVal = methodMap[mapName].get(eventName);
-
-    if(!cb) {
-        eventVal();
-    }
-    else {
-        eventVal(cb);
-    }
+    const handler = methodMap[mapName].get(eventName);
+    
+    handler(request, response);
 }
 
 module.exports = {

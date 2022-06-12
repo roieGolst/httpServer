@@ -6,7 +6,7 @@ const VERSION_POSTION = 2;
 
 function parse(data) {
     // if data == buffer WIP!!!
-    if(!data) {
+    if(!(data instanceof Buffer)) {
         throw Error("invalid packet type");
     }
 

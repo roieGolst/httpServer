@@ -4,10 +4,9 @@ const net = require("net");
 
 const handleNewConnection = function(socket) {
   socket.on("data", (data) =>{
-      let req =  parse.parser(data); 
-      console.log(req);
+      let req =  parse.parser(data);
 
-      eventsMechanism.emit(req.method, req.path, {
+      eventsMechanism.emit(req.method, req.path, req, {
           send:  function (body) {
             socket.write(`HTTP/1.1 200 OK
             Content-Type: text/html; charset=utf-8\r\n
