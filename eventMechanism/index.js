@@ -27,7 +27,7 @@ function isHandlerExists(mapName, eventName) {
 
 function eventEmiter(mapName ,eventName, request, response) {
     if(!isHandlerExists(mapName, eventName)) {
-        return;
+        return false;
     }
 
     if(! (typeof eventName == "string") || eventName instanceof String) {
