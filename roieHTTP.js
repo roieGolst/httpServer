@@ -2,11 +2,15 @@ const eventsMechanism = require("./eventMechanism");
 const parse = require("./parse");
 const net = require("net");
 
+const packetBuilder = require("./httpPacketBuilder");
+
 const handleNewConnection = function(socket) {
   socket.on("data", (data) =>{
       let req =  parse.parser(data);
 
-      eventsMechanism.emit(req.method, req.path, req, response);
+      eventsMechanism.emit(req.method, req.path, req, {send: function(responsePacket) {
+          socket.write(responsePacket);
+      }});
   });
 };
 
@@ -50,6 +54,8 @@ module.exports = {
 
     post: function(eventName, cb) {
         eventsMechanism.on("POST" , eventName, cb);
-    }
+    },
+
+    packetBuilder: packetBuilder
 
 };
