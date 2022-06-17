@@ -1,4 +1,4 @@
-const checkList = require("./lib");
+const checkList = require("../lib");
 
 const METHOD_POSTION = 0;
 const PATH_POSTION = 1;
@@ -43,7 +43,6 @@ function parse(data) {
         const parsedHeader = parseData[headersLength].split(": ");    
         
         if(parsedHeader.length > 2){
-            console.log(parsedHeader);
             throw Error("Invalid Header");
         }
 

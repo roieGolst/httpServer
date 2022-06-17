@@ -2,10 +2,6 @@ const roieHTTP = require("./roieHTTP");;
 const PORT = 8124;
 
 roieHTTP.get("/", (req, res) => {
-
-
-    console.log(req);
-
     const response = roieHTTP.packetBuilder.response(
         req.version, 
         200, 

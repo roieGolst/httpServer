@@ -41,6 +41,7 @@ function eventEmiter(mapName ,eventName, request, response) {
 
 module.exports = {
     on: eventHandler,
-    emit: eventEmiter
+    emit: eventEmiter,
+    isHandlerExists: isHandlerExists
 }
 

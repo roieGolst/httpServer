@@ -1,17 +1,17 @@
-const checkList = require("./lib");
+const checkList = require("../lib");
 
-class responsePacketBuilder {
+class ResponsePacketBuilder {
 
-    #statusCodeLocation;
+    #statusCodePosition;
 
     constructor(version, statusCode, headers, body) {
         this.#isValidArguments(version, statusCode, headers, body);
 
         this.version = version,
-        this.#statusCodeLocation = this.#getStatus(statusCode),
+        this.#statusCodePosition = this.#getStatus(statusCode),
         this.statusCode = {
-            statusNum: checkList.statusCodeList[this.#statusCodeLocation].id,
-            statusDescription : checkList.statusCodeList[this.#statusCodeLocation].val,
+            statusNum: checkList.statusCodeList[this.#statusCodePosition].id,
+            statusDescription : checkList.statusCodeList[this.#statusCodePosition].val,
         }
         this.headers = this.#headerToString(headers),
         this.body = body 
@@ -38,10 +38,10 @@ class responsePacketBuilder {
     }
 
     #headerToString(headers) {
-        var stringHeaders = '';
-        for (let p in headers) {
-            if (Object.prototype.hasOwnProperty.call(headers, p)) {
-                stringHeaders += p + ':' + " " + headers[p] + '\r\n';
+        let stringHeaders = '';
+        for (let prototype in headers) {
+            if (Object.prototype.hasOwnProperty.call(headers, prototype)) {
+                stringHeaders += `${prototype}: ${headers[prototype]}\r\n`;
             }
         }
         return stringHeaders;
@@ -55,7 +55,7 @@ class responsePacketBuilder {
     }
 }
 
-class requestPacketBuilder {
+class RequestPacketBuilder {
 
     constructor(methodName, path, version, headers, body) {
         this.#isValidArguments(methodName, path, version, body);
@@ -103,10 +103,10 @@ class requestPacketBuilder {
     }
 
     #headersToString(headers) {
-        var stringHeaders = '';
-        for (let p in headers) {
-            if (Object.prototype.hasOwnProperty.call(headers, p)) {
-                stringHeaders += p + ':' + " " + headers[p] + '\r\n';
+        let stringHeaders = '';
+        for (let prototype in headers) {
+            if (Object.prototype.hasOwnProperty.call(headers, prototype)) {
+                stringHeaders += `${prototype}: ${headers[prototype]}\r\n`;
             }
         }
         return stringHeaders;
@@ -123,18 +123,18 @@ class requestPacketBuilder {
 
 module.exports = {
     request: function(methodName, path, version, headers, body){
-        return new requestPacketBuilder(methodName, path, version, headers, body);
+        return new RequestPacketBuilder(methodName, path, version, headers, body);
     },
     response: function(version, statusCode, headers, body) {
-        return new responsePacketBuilder(version, statusCode, headers, body);
+        return new ResponsePacketBuilder(version, statusCode, headers, body);
     }
-}
+};
 
 
 
 
 //example for new response instance
-// const response = new responsePacketBuilder(
+// const response = new ResponsePacketBuilder(
 //     "HTTP/1.1", 
 //     404, 
 //     {Host: 'localhost:8124', Connection: 'keep-alive', 'Cache-Control': 'max-age=0'}, 
@@ -144,7 +144,7 @@ module.exports = {
 // console.log(response.toString());
 
 //example for new response instance
-// const request = new requestPacketBuilder(
+// const request = new RequestPacketBuilder(
 //     "GET",
 //      "/HelloWorld",
 //       "HTTP/1.1"
