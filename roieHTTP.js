@@ -4,6 +4,7 @@ const net = require("net");
 const fs = require("fs");
 
 const packetBuilder = require("./Utils/packetBuilder");
+
 function page404(socket, req) {
     if(!(eventsMechanism.isHandlerExists(req.method, req.path))) {
         const page404 = fs.readFileSync("404.html", "utf-8");
@@ -16,6 +17,7 @@ function page404(socket, req) {
 
         socket.write(notFoundResponse.toString());
         socket.destroy();
+        
     }
 }
 

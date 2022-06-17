@@ -3,18 +3,22 @@ const checkList = require("../lib");
 class ResponsePacketBuilder {
 
     #statusCodePosition;
-
+    #version;
+    #statusCode;
+    #headers
+    #body
+    
     constructor(version, statusCode, headers, body) {
         this.#isValidArguments(version, statusCode, headers, body);
 
-        this.version = version,
+        this.#version = version,
         this.#statusCodePosition = this.#getStatus(statusCode),
-        this.statusCode = {
+        this.#statusCode = {
             statusNum: checkList.statusCodeList[this.#statusCodePosition].id,
             statusDescription : checkList.statusCodeList[this.#statusCodePosition].val,
         }
-        this.headers = this.#headerToString(headers),
-        this.body = body 
+        this.#headers = this.#headerToString(headers),
+        this.#body = body 
     }
 
     #getStatus(statusCode) {
@@ -22,7 +26,7 @@ class ResponsePacketBuilder {
     }
 
     #isValidArguments(version, statusCode, headers, body) {
-        if(! (typeof version == "string") || version instanceof String) {
+        if(! version instanceof String) {
             throw Error(`Version argument have to be a "String"`);
         }
 
@@ -33,8 +37,6 @@ class ResponsePacketBuilder {
         if(!(headers instanceof Object)) {
             throw Error(`Header/s have to be a "Object"`);
         }
-
-        return;
     }
 
     #headerToString(headers) {
@@ -48,23 +50,29 @@ class ResponsePacketBuilder {
     }
 
     toString() {
-        if(!this.body){
-            return `${this.version} ${this.statusCode.statusNum} ${this.statusCode.statusDescription}\r\n${this.headers}\r\n`
+        if(!this.#body){
+            return `${this.#version} ${this.#statusCode.statusNum} ${this.#statusCode.statusDescription}\r\n${this.#headers}\r\n`
         }
-        return `${this.version} ${this.statusCode.statusNum} ${this.statusCode.statusDescription}\r\n${this.headers}\r\n${this.body}`
+        return `${this.#version} ${this.#statusCode.statusNum} ${this.#statusCode.statusDescription}\r\n${this.#headers}\r\n${this.#body}`
     }
 }
 
 class RequestPacketBuilder {
 
+    #method;
+    #path;
+    #version;
+    #headers;
+    #body;
+
     constructor(methodName, path, version, headers, body) {
         this.#isValidArguments(methodName, path, version, body);
 
-        this.method = this.#isMethodExsits(methodName),
-        this.path = path,
-        this.version =this.#isVersionExsits(version),
-        this.headers = this.#headersToString(headers),
-        this.body = body
+        this.#method = this.#isMethodExsits(methodName),
+        this.#path = path,
+        this.#version =this.#isVersionExsits(version),
+        this.#headers = this.#headersToString(headers),
+        this.#body = body
     }
 
     
@@ -113,10 +121,10 @@ class RequestPacketBuilder {
     }
 
     toString() {
-        if(!this.body){
-            return `${this.method} ${this.path} ${this.version}\r\n${this.headers}\r\n`
+        if(!this.#body){
+            return `${this.#method} ${this.#path} ${this.#version}\r\n${this.#headers}\r\n`
         }
-        return `${this.method} ${this.path} ${this.version}\r\n${this.headers}\r\n${this.body}`;
+        return `${this.#method} ${this.#path} ${this.#version}\r\n${this.#headers}\r\n${this.#body}`;
     }
 }
 
