@@ -1,8 +1,6 @@
 const checkList = require("../lib");
 
 class ResponsePacketBuilder {
-
-    #statusCodePosition;
     #version;
     #statusCode;
     #headers
@@ -11,18 +9,21 @@ class ResponsePacketBuilder {
     constructor(version, statusCode, headers, body) {
         this.#isValidArguments(version, statusCode, headers, body);
 
+        if(!this.#getStatus(statusCode)) {
+            throw Error("Invalid status code");
+        }
+
         this.#version = version,
-        this.#statusCodePosition = this.#getStatus(statusCode),
         this.#statusCode = {
-            statusNum: checkList.statusCodeList[this.#statusCodePosition].id,
-            statusDescription : checkList.statusCodeList[this.#statusCodePosition].val,
+            statusNum: statusCode,
+            statusDescription : checkList.statusCodeList.statusCode,
         }
         this.#headers = this.#headerToString(headers),
         this.#body = body 
     }
 
     #getStatus(statusCode) {
-        return checkList.statusCodeList.map(object => (object.id)).indexOf(statusCode);
+        return checkList.statusCodeList[statusCode];
     }
 
     #isValidArguments(version, statusCode, headers, body) {
@@ -42,10 +43,9 @@ class ResponsePacketBuilder {
     #headerToString(headers) {
         let stringHeaders = '';
         for (let prototype in headers) {
-            if (Object.prototype.hasOwnProperty.call(headers, prototype)) {
-                stringHeaders += `${prototype}: ${headers[prototype]}\r\n`;
-            }
+            stringHeaders += `${prototype}: ${headers[prototype]}\r\n`;
         }
+
         return stringHeaders;
     }
 
@@ -71,7 +71,7 @@ class RequestPacketBuilder {
         this.#method = this.#isMethodExsits(methodName),
         this.#path = path,
         this.#version =this.#isVersionExsits(version),
-        this.#headers = this.#headersToString(headers),
+        this.#headers = this.#headerToString(headers),
         this.#body = body
     }
 
@@ -110,13 +110,12 @@ class RequestPacketBuilder {
         return version;
     }
 
-    #headersToString(headers) {
+    #headerToString(headers) {
         let stringHeaders = '';
         for (let prototype in headers) {
-            if (Object.prototype.hasOwnProperty.call(headers, prototype)) {
-                stringHeaders += `${prototype}: ${headers[prototype]}\r\n`;
-            }
+            stringHeaders += `${prototype}: ${headers[prototype]}\r\n`;
         }
+
         return stringHeaders;
     }
 

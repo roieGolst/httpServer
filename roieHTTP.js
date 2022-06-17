@@ -5,28 +5,40 @@ const fs = require("fs");
 
 const packetBuilder = require("./Utils/packetBuilder");
 
-function page404(socket, req) {
-    if(!(eventsMechanism.isHandlerExists(req.method, req.path))) {
+function page404(req) {
+    try {
         const page404 = fs.readFileSync("404.html", "utf-8");
-        const notFoundResponse = packetBuilder.response(
+
+        return packetBuilder.response(
             req.version,
             404,
             {"Content-Type": "text/html; charset=utf-8"},
             `${page404}`
         );
-
-        socket.write(notFoundResponse.toString());
-        socket.destroy();
-        
+    }
+    catch {
+        return packetBuilder.response(
+            req.version,
+            404,
+            {"Content-Type": "text/html; charset=utf-8"},
+            `404 Not found`
+        )
     }
 }
+
 
 const handleNewConnection = function(socket) {
   socket.on("data", (data) =>{
         let req =  parse.parser(data);
+        
+        if(!eventsMechanism.isHandlerExists(req.method, req.path)) {
+            const notFoundResponse =  page404(req);
 
-        page404(socket, req);
-
+            socket.write(notFoundResponse.toString());
+            socket.destroy();
+            return;
+        }
+        
         eventsMechanism.emit(req.method, req.path, req, {send: function(responsePacket) {
             socket.write(responsePacket);
             socket.destroy();
