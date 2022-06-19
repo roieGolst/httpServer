@@ -16,7 +16,7 @@ class ResponsePacketBuilder {
         this.#version = version,
         this.#statusCode = {
             statusNum: statusCode,
-            statusDescription : checkList.statusCodeList.statusCode,
+            statusDescription : checkList.statusCodeList[statusCode],
         }
         this.#headers = this.#headerToString(headers),
         this.#body = body 

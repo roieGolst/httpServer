@@ -1,5 +1,7 @@
 const roieHTTP = require("./roieHTTP");;
 const PORT = 8124;
+const path = require("path");
+const public = path.join(__dirname, "public")
 
 roieHTTP.get("/", (req, res) => {
     const response = roieHTTP.packetBuilder.response(
@@ -9,7 +11,7 @@ roieHTTP.get("/", (req, res) => {
         `<h1>I did itttttt</h1>`
     );
 
-    res.send(response.toString());
+    res.sharePublic(req, public);
 });
 
 roieHTTP.post("/HelloWorld", (req, res) => {

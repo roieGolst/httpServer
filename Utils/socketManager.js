@@ -2,6 +2,7 @@ const eventsMechanism = require("../eventMechanism");
 const parse = require("./parse");
 const packetBuilder = require("./packetBuilder");
 const fs = require("fs");
+const path = require("path");
 
 class SocketManager {
     #socket;
@@ -46,6 +47,62 @@ class SocketManager {
         this.#socket.destroy();
     }
 
+    sharePublic(request, dirPath) {
+        let filepath;
+        let publicWeb = "";
+        fs.readdirSync(dirPath).forEach(file => {
+            if(path.extname(file)  == ".html"){
+                filepath = path.join(dirPath, file);
+                return;
+            }
+        });
+
+        publicWeb += fs.readFileSync(filepath);
+
+        const responsePacket = packetBuilder.response(
+            request.version,
+            200,
+            this.#getContentTypeHeader(".html"),
+            `${publicWeb}`
+        );
+
+        this.send(responsePacket.toString());
+    }
+
+    #isExsitsFile(filePath) {
+        if(filePath == "/" || !filePath) {
+            return false;
+        }
+
+        const serchPath = path.join("public", filePath);
+
+        
+        if(!serchPath) {
+            return false;
+        }
+
+        if(!fs.existsSync(serchPath)) {
+            return false;
+        }
+
+        return {
+            data: fs.readFileSync(serchPath).toString("utf-8"),
+            type: path.extname(filePath)
+        };
+    }
+
+    #getContentTypeHeader(fileType) {
+        switch(fileType) {
+            case ".html":
+                return {"Content-Type": "text/html; charset=utf-8"};
+            case ".css":
+                return {"Content-Type": "text/css"};
+            case ".js":
+                return {"Content-Type": "text/js"};
+        }
+    }
+
+
     _fetchData() {
 
         this.#socket.on("error", (err) => {
@@ -56,22 +113,33 @@ class SocketManager {
         });
     
         this.#socket.on("data", (data) =>{
-            let req =  this.#requestParser(data);
+            const req =  this.#requestParser(data);
+            const file = this.#isExsitsFile(req.path);
 
             if(!req) {
                 return;
             }
-            
-            if(!eventsMechanism.isHandlerExists(req.method, req.path)) {
-                const notFoundResponse = this.#page404(req);
-    
-                this.#socket.write(notFoundResponse.toString());
-                this.#socket.destroy();
-                return;
-            }
-            
-            eventsMechanism.emit(req.method, req.path, req, this)
 
+            if(!file && !eventsMechanism.isHandlerExists(req.method, req.path)) {
+                const page404 = this.#page404(req);
+                this.send(page404.toString());
+            }
+
+            if(file) {
+                const responsePacket = packetBuilder.response(
+                    req.version,
+                    200,
+                   this.#getContentTypeHeader(file.type),
+                   `${file.data}`
+                )
+
+                this.send(responsePacket.toString())
+                return;  
+            }
+
+
+            
+            eventsMechanism.emit(req.method, req.path, req, this);
       });
     }
 }
