@@ -24,7 +24,7 @@ function parse(data) {
             
         }
 
-        if(!checkList.versionList.indexOf(rowMethod[VERSION_POSTION]) == -1) {
+        if(checkList.versionList.indexOf(rowMethod[VERSION_POSTION]) == -1) {
             throw Error("invalid version");
         }
     }
