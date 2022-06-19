@@ -10,7 +10,7 @@ function eventHandler(mapName,eventName, cb) {
         throw Error("Event name heve to be a String");
     }
 
-    if(!methodMap.mapName) {
+    if(!methodMap[mapName]) {
         methodMap[mapName] = new Map();
     }
 

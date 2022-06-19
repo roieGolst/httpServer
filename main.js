@@ -4,6 +4,10 @@ const path = require("path");
 const public = path.join(__dirname, "public")
 
 roieHTTP.get("/", (req, res) => {
+    res.sharePublic(req, public);
+});
+
+roieHTTP.get("/hello", (req, res) => {
     const response = roieHTTP.packetBuilder.response(
         req.version, 
         200, 
@@ -11,8 +15,8 @@ roieHTTP.get("/", (req, res) => {
         `<h1>I did itttttt</h1>`
     );
 
-    res.sharePublic(req, public);
-});
+    res.send(response.toString());
+})
 
 roieHTTP.post("/HelloWorld", (req, res) => {
     console.log(req);
