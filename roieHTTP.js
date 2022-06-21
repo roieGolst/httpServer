@@ -1,12 +1,11 @@
 const eventsMechanism = require("./eventMechanism");
-const packetBuilder = require("./Utils/packetBuilder");
+const Utils = require("./Utils");
 const net = require("net");
-const ConnectionManager = require("./Utils/ConnectionManager");
 const fs = require("fs");
 
 
 const handleNewConnection = function(socket) {
-    const cM = new ConnectionManager(socket);
+    const cM = new Utils.ConnectionManager(socket, new Utils.DataCheck);
 
     cM._fetchData();
 };
@@ -31,7 +30,7 @@ module.exports = {
         eventsMechanism.on("POST" , eventName, cb);
     },
 
-    packetBuilder: packetBuilder,
+    packetBuilder: Utils.packetBuilder,
 
     static: function(htmlFilePath) {
         eventsMechanism.on(`GET`, "/", (req, res) => {
@@ -39,7 +38,7 @@ module.exports = {
             try {
 
                 file = fs.readFileSync(htmlFilePath);
-                const responsePacket = packetBuilder.response(
+                const responsePacket = Utils.packetBuilder.response(
                     `HTTP/1.1`,
                     200,
                     {"Content-Type": "text/html; charset=utf-8"},
