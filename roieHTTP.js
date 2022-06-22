@@ -5,9 +5,9 @@ const fs = require("fs");
 
 
 const handleNewConnection = function(socket) {
-    const cM = new Utils.ConnectionManager(socket, new Utils.DataCheck);
+    const connectionManager = new Utils.ConnectionManager(socket, new Utils.DataCheck());
 
-    cM._fetchData();
+    connectionManager.init();
 };
 
 

@@ -23,7 +23,14 @@ roieHTTP.get("/hello", (req, res) => {
 roieHTTP.post("/HelloWorld", (req, res) => {
     console.log(req);
 
-    res.send("Hello from post fun");
+    const response = roieHTTP.packetBuilder.response(
+        req.version, 
+        200, 
+        {"Content-Type": "text/html; charset=utf-8"},
+        `<h1>Hello from post fun</h1>`
+    );
+    
+    res.send(response.toString());
 })
 
 roieHTTP.bootstrap(PORT, () => {

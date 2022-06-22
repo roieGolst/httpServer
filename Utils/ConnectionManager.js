@@ -2,79 +2,92 @@ const eventsMechanism = require("../eventMechanism");
 const packetBuilder = require("./packetBuilder");
 const fs = require("fs");
 
-
-
+const PAGE_404_CONTENT = page404Content();
 class ConnectionManager {
+
     #socket;
-    #DataCheck
-    constructor(socket, DataCheck) {
+    #dataCheck;
+
+    constructor(socket, dataCheck) {
         this.#socket = socket,
-        this.#DataCheck = DataCheck
+        this.#dataCheck = dataCheck
     }
 
-    #page404() {
-        try {
-            const page404 = fs.readFileSync("404.html", "utf-8");
-    
-            return packetBuilder.response(
-                `HTTP/1.1`,
-                404,
-                {"Content-Type": "text/html; charset=utf-8"},
-                `${page404}`
-            );
-        }
-        catch {
-            return packetBuilder.response(
-                `HTTP/1.1`,
-                404,
-                {"Content-Type": "text/html; charset=utf-8"},
-                `404 Not found`
-            )
-        }
-    }
-
-    send(responsePacket) {
-        this.#socket.write(responsePacket);
-        this.#socket.destroy();
-        return;
-    }
-
-    _fetchData() {
-
+    init() {
+        
         this.#socket.on("error", (err) => {
             console.error(err);
             this.#socket.destroy();
         })
     
         this.#socket.on("data", (data) =>{
-            const req =  this.#DataCheck.requestParser(data);
-            const file = this.#DataCheck.isFileExists(req.path);
+            const req =  this.#dataCheck.requestParser(data);
+            
 
             if(!req) {
+                this.#destroy();
                 return;
             }
 
-            if(!file && !eventsMechanism.isHandlerExists(req.method, req.path)) {
-                const page404 = this.#page404();
-                this.send(page404.toString());
+            if(req.method == "GET") {
+                const file = this.#dataCheck.readFile(req.path);
+
+                if(file){
+                    const responsePacket = packetBuilder.response(
+                        req.version,
+                        200,
+                        this.#dataCheck.getContentTypeHeader(file.type),
+                        `${file.data}`
+                    );
+
+                    this.send(responsePacket.toString());
+                    return;
+                }
+                
             }
 
-            if(file && req.method == "GET") {
-                const responsePacket = packetBuilder.response(
-                    req.version,
-                    200,
-                   this.#DataCheck.getContentTypeHeader(file.type),
-                   `${file.data}`
-                )
-
-                this.send(responsePacket.toString())
-                return;  
+            if(!eventsMechanism.isHandlerExists(req.method, req.path)) {
+                this.#page404();
+                return;
             }
 
-
-            
             eventsMechanism.emit(req.method, req.path, req, this);
       });
+    }
+
+    
+    send(responsePacket) {
+        this.#socket.write(responsePacket);
+        this.#destroy()
+    }
+    
+    #destroy() {
+        this.#socket.destroy();
+    }
+
+    #page404() {
+       this.send(PAGE_404_CONTENT.toString());
+    }
+}
+
+function page404Content() {
+    try {
+        const page404 = fs.readFileSync("404.html", "utf-8");
+
+        return packetBuilder.response(
+            `HTTP/1.1`,
+            404,
+            {"Content-Type": "text/html; charset=utf-8"},
+            `${page404}`
+        );
+    }
+    catch {
+        return packetBuilder.response(
+            `HTTP/1.1`,
+            404,
+            {"Content-Type": "text/html; charset=utf-8"},
+            `404 Not found`
+        )
     }
 }
 

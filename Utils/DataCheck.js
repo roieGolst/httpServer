@@ -15,21 +15,17 @@ class DataCheck {
     }
 
     isValidPaht(serchPath) {
-        let root = path.join(require.main.path, "public");
+        const safeInput = path.normalize(serchPath);
 
-        let safe_input = path.normalize(serchPath).replace(/^(\.\.(\/|\\|$))+/, '');
-        let path_string = path.join(root, safe_input);
-
-
-        if (path_string.indexOf(root) !== 0 || safe_input == "\\") {
-            return false;
+        if(safeInput == "" || safeInput == "\\") {
+            return false
         }
+        
+        return path.join(require.main.path, "public", safeInput);
+    }
 
-        return path_string;
-        }
-
-    isFileExists(filePath) {
-        if(filePath == "/" || !filePath) {
+    readFile(filePath) {
+        if(!filePath || filePath == "/") {
             return false;
         }
 
@@ -47,22 +43,22 @@ class DataCheck {
         }
 
         return {
-            data: fs.readFileSync(safePath, "utf-8"),
-            type: path.extname(filePath)
+            data: fs.readFileSync(safePath),
+            type: path.extname(filePath).slice(1)
         };
     }
 
     getContentTypeHeader(fileType) {
         switch(fileType) {
-            case ".html":
+            case "html":
                 return {"Content-Type": "text/html; charset=utf-8"};
-            case ".css":
+            case "css":
                 return {"Content-Type": "text/css"};
-            case ".js":
+            case "js":
                 return {"Content-Type": "text/js"};
-            case ".jpg":
+            case "jpg":
                 return {"Content-Type": "image/jpeg"};
-            case ".png":
+            case "png":
                 return {"Content-Type": "image/png"};
         }
     }
