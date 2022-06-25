@@ -48,19 +48,25 @@ class DataCheck {
         };
     }
 
-    getContentTypeHeader(file) {
-        switch(file.type) {
-            case "html":
-                return {"Content-Type": "text/html; charset=utf-8"};
-            case "css":
-                return {"Content-Type": "text/css"};
-            case "js":
-                return {"Content-Type": "text/js"};
-            case "jpg":
-                return {"Content-length": `${file.data.byteLength}`, "Content-Type": "image/jpg"};
-            case "png":
-                return {"Content-length": `${file.data.byteLength}`, "Content-Type": "image/png"};
+    getDefaultHeaders(file) {
+        const headerObject = {
+            "Content-length": `${file.data.byteLength}`,
+            "Date": `${new Date().toISOString().slice(0,10)}`,
+            "server": "roieHTTP"
         }
+        switch(file.type) {
+            case "html" || "css":
+                headerObject["Content-Type"] = `text/${file.type}`;
+                break;
+            case "js":
+                headerObject["Content-Type"] = `text/javascript`;
+                break;
+            case "gif"|| "jpeg"|| "png" || "svg" ||"webp":
+                headerObject["Content-Type"] = `image/${file.type}`; 
+                break;       
+        }
+
+        return headerObject;
     }
 }
 

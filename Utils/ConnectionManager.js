@@ -36,7 +36,7 @@ class ConnectionManager {
                     const responsePacket = packetBuilder.response(
                         req.version,
                         200,
-                        this.#dataCheck.getContentTypeHeader(file),
+                        this.#dataCheck.getDefaultHeaders(file),
                         file.data
                     );
 
