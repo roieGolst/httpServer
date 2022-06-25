@@ -51,9 +51,12 @@ class ResponsePacketBuilder {
 
     toString() {
         if(!this.#body){
-            return `${this.#version} ${this.#statusCode.statusNum} ${this.#statusCode.statusDescription}\r\n${this.#headers}\r\n`
+            return {packet: `${this.#version} ${this.#statusCode.statusNum} ${this.#statusCode.statusDescription}\n${this.#headers}`}
         }
-        return `${this.#version} ${this.#statusCode.statusNum} ${this.#statusCode.statusDescription}\r\n${this.#headers}\r\n${this.#body}`
+        return {
+            "packet": `${this.#version} ${this.#statusCode.statusNum} ${this.#statusCode.statusDescription}\n${this.#headers}\n`,
+            "payload": this.#body
+        }
     }
 }
 

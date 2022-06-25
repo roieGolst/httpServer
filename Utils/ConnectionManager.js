@@ -36,8 +36,8 @@ class ConnectionManager {
                     const responsePacket = packetBuilder.response(
                         req.version,
                         200,
-                        this.#dataCheck.getContentTypeHeader(file.type),
-                        `${file.data}`
+                        this.#dataCheck.getContentTypeHeader(file),
+                        file.data
                     );
 
                     this.send(responsePacket.toString());
@@ -57,9 +57,15 @@ class ConnectionManager {
 
     
     send(responsePacket) {
-        this.#socket.write(responsePacket);
+        if(!responsePacket["payload"]) {
+            this.#socket.write(responsePacket["packet"]);
+            this.#destroy()
+        }
+
+        this.#socket.write(responsePacket["packet"]);
+        this.#socket.write(responsePacket["payload"]);
         this.#destroy()
-    }
+     }
     
     #destroy() {
         this.#socket.destroy();

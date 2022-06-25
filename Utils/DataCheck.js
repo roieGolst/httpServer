@@ -48,8 +48,8 @@ class DataCheck {
         };
     }
 
-    getContentTypeHeader(fileType) {
-        switch(fileType) {
+    getContentTypeHeader(file) {
+        switch(file.type) {
             case "html":
                 return {"Content-Type": "text/html; charset=utf-8"};
             case "css":
@@ -57,9 +57,9 @@ class DataCheck {
             case "js":
                 return {"Content-Type": "text/js"};
             case "jpg":
-                return {"Content-Type": "image/jpeg"};
+                return {"Content-length": `${file.data.byteLength}`, "Content-Type": "image/jpg"};
             case "png":
-                return {"Content-Type": "image/png"};
+                return {"Content-length": `${file.data.byteLength}`, "Content-Type": "image/png"};
         }
     }
 }
