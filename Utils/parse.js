@@ -50,7 +50,7 @@ function parser(data) {
         parserBody.push(parseData[i]);
     }
 
-    let body = bodyParser(parserBody.join(""));
+    let body = parseParameters(parserBody.join(""));
 
     const req = {
         method,
@@ -75,26 +75,18 @@ function rowMethodParse(rowMethod) {
             throw Error("invalid version");
         }
 
-        const isParametersExists = rowMethod[PATH_POSTION].split("?");
+        const splitedPath = rowMethod[PATH_POSTION].split("?");
 
-        let parametersAndPath;
+        let parametres = undefined;
         
-        if(isParametersExists.length >= 2) {
-            parametersAndPath =  parametrsParse(isParametersExists);
-        }
-        
-        else{
-            return {
-                mathod: rowMethod[METHOD_POSTION],
-                path: rowMethod[PATH_POSTION],
-                version: rowMethod[VERSION_POSTION]
-            }
+        if(splitedPath.length >= 2) {
+            parametres =  parseParameters(splitedPath[PARAMERS_POSTION]);
         }
 
         return {
             mathod: rowMethod[METHOD_POSTION],
-            path: parametersAndPath.path,
-            parametrs: parametersAndPath.parametres,
+            path: splitedPath[0],
+            parametrs: parametres,
             version: rowMethod[VERSION_POSTION]
         }
         
@@ -104,10 +96,10 @@ function rowMethodParse(rowMethod) {
     }
 }
 
-function parametrsParse(parametresRow) {
+function parseParameters(parametresRow) {
     const parametres = {}
 
-    const arrayParametrs = parametresRow[PARAMERS_POSTION].split("&");
+    const arrayParametrs = parametresRow.split("&");
 
     for(let i in arrayParametrs) {
         let strParametres = arrayParametrs[i].split("=");
@@ -115,27 +107,7 @@ function parametrsParse(parametresRow) {
         parametres[strParametres[0]] = strParametres[1];
     }
 
-    return {
-        path: parametresRow[0],
-        parametres
-    }
-}
-
-function bodyParser(body) {
-    const bodyObject = {}
-
-    const arrayBodyData = body.split("&");
-
-    for(let i in arrayBodyData) {
-        let strBody = arrayBodyData[i].split("=");
-
-        if(strBody == "") {
-            return undefined;
-        }
-        bodyObject[strBody[0]] = strBody[1];
-    }
-
-    return bodyObject;
+    return parametres;
 }
 
 module.exports = parser
