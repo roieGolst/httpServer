@@ -6,7 +6,7 @@ class DataCheck {
 
     requestParser(request) {
         try {
-            return parser.parser(request);
+            return parser(request);
         }
         catch(err) {
             console.error(`Parser error: ${err}`);
@@ -48,25 +48,34 @@ class DataCheck {
         };
     }
 
+    getContentType(fileType) {
+        switch(fileType) {
+            case "html":
+            case "css":
+                return `text/${fileType}`;
+
+            case "js":
+                return `text/javascript`;
+                
+            case "gif":
+            case "png":
+            case"svg":
+            case"webp":
+            case "jpg":
+                return `image/${fileType}`;       
+        }
+    }
+
     getDefaultHeaders(file) {
-        const headerObject = {
+        
+        const ContentType = this.getContentType(file.type);
+
+        return {
+            "Content-Type": ContentType,
             "Content-length": `${file.data.byteLength}`,
             "Date": `${new Date().toISOString().slice(0,10)}`,
             "server": "roieHTTP"
         }
-        switch(file.type) {
-            case "html" || "css":
-                headerObject["Content-Type"] = `text/${file.type}`;
-                break;
-            case "js":
-                headerObject["Content-Type"] = `text/javascript`;
-                break;
-            case "gif"|| "jpeg"|| "png" || "svg" ||"webp":
-                headerObject["Content-Type"] = `image/${file.type}`; 
-                break;       
-        }
-
-        return headerObject;
     }
 }
 

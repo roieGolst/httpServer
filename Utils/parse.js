@@ -3,9 +3,10 @@ const checkList = require("../lib");
 const METHOD_POSTION = 0;
 const PATH_POSTION = 1;
 const VERSION_POSTION = 2;
+const PARAMERS_POSTION = 1;
 
-function parse(data) {
-    // if data == buffer WIP!!!
+function parser(data) {
+    
     if(!(data instanceof Buffer)) {
         throw Error("invalid packet type");
     }
@@ -16,25 +17,17 @@ function parse(data) {
         throw Error("Invalid data length");
     }
 
-    const rowMethod = parseData[0].split(" ");
+    let rowMethod = rowMethodParse(parseData[0].split(" "))
 
-    if(rowMethod.length == 3) {
-        if(checkList.methodList.indexOf(rowMethod[METHOD_POSTION]) == -1) {
-            throw Error("invalid method");
-            
-        }
+    const method = rowMethod.mathod;
+    const path = rowMethod.path;
+    const version = rowMethod.version;
 
-        if(checkList.versionList.indexOf(rowMethod[VERSION_POSTION]) == -1) {
-            throw Error("invalid version");
-        }
+    let parametres;
+
+    if(!rowMethod.parametres) {
+        parametres = undefined;
     }
-    else {
-        throw Error("invalid request");
-    }
-
-    const method = rowMethod[METHOD_POSTION];
-    const path = rowMethod[PATH_POSTION];
-    const version = rowMethod[VERSION_POSTION];
 
     const headers = {};
     let headersLength = 1;
@@ -57,23 +50,92 @@ function parse(data) {
         parserBody.push(parseData[i]);
     }
 
-    let body = parserBody.join("");
-
-    if(body == "") {
-        body = undefined;
-    }
+    let body = bodyParser(parserBody.join(""));
 
     const req = {
-        method: method,
-        path: path,
-        version: version,
-        headers: headers,
-        body: body
+        method,
+        path,
+        parametres,
+        version,
+        headers,
+        body
     };
     
     return req;
 }
 
-module.exports = {
-    parser: parse,
+function rowMethodParse(rowMethod) {
+    if(rowMethod.length == 3) {
+        if(checkList.methodList.indexOf(rowMethod[METHOD_POSTION]) == -1) {
+            throw Error("invalid method");
+            
+        }
+
+        if(checkList.versionList.indexOf(rowMethod[VERSION_POSTION]) == -1) {
+            throw Error("invalid version");
+        }
+
+        const isParametersExists = rowMethod[PATH_POSTION].split("?");
+
+        let parametersAndPath;
+        
+        if(isParametersExists.length >= 2) {
+            parametersAndPath =  parametrsParse(isParametersExists);
+        }
+        
+        else{
+            return {
+                mathod: rowMethod[METHOD_POSTION],
+                path: rowMethod[PATH_POSTION],
+                version: rowMethod[VERSION_POSTION]
+            }
+        }
+
+        return {
+            mathod: rowMethod[METHOD_POSTION],
+            path: parametersAndPath.path,
+            parametrs: parametersAndPath.parametres,
+            version: rowMethod[VERSION_POSTION]
+        }
+        
+    }
+    else {
+        throw Error("invalid request");
+    }
 }
+
+function parametrsParse(parametresRow) {
+    const parametres = {}
+
+    const arrayParametrs = parametresRow[PARAMERS_POSTION].split("&");
+
+    for(let i in arrayParametrs) {
+        let strParametres = arrayParametrs[i].split("=");
+
+        parametres[strParametres[0]] = strParametres[1];
+    }
+
+    return {
+        path: parametresRow[0],
+        parametres
+    }
+}
+
+function bodyParser(body) {
+    const bodyObject = {}
+
+    const arrayBodyData = body.split("&");
+
+    for(let i in arrayBodyData) {
+        let strBody = arrayBodyData[i].split("=");
+
+        if(strBody == "") {
+            return undefined;
+        }
+        bodyObject[strBody[0]] = strBody[1];
+    }
+
+    return bodyObject;
+}
+
+module.exports = parser
