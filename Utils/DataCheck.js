@@ -62,6 +62,7 @@ class DataCheck {
             case"svg":
             case"webp":
             case "jpg":
+            case "mp4":
                 return `image/${fileType}`;       
         }
     }
